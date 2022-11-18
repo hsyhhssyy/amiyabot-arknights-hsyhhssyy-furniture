@@ -6,7 +6,7 @@ from amiyabot import PluginInstance
 from amiyabot.network.download import download_async
 
 from core import log, Message, Chain
-from core.util import get_index_from_text,create_dir
+from core.util import get_index_from_text,create_dir,any_match
 from core.resource.arknightsGameData.common import JsonData
 
 curr_dir = os.path.dirname(__file__)
@@ -103,49 +103,62 @@ async def _(data: Message):
     # 直接列出家具列表
 
     furniset_list = []
+    furniset_list_names = []
+    furniset_item = {}
 
     for furniset_id in FurnitureData.furniture_sets.keys():
         furniset_list.append(FurnitureData.furniture_sets[furniset_id])
+        furniset_list_names.append(FurnitureData.furniture_sets[furniset_id].name)
 
-    text = f'博士，这是目前可以获得的所有家具套装的列表\n\n'
-    for i, furniset in enumerate(furniset_list):
-        text += f'[{i + 1}] %s\n' % furniset.name
+    furniset = None
 
-    text += '\n回复【序号】查询对应的家具套装资料'
+    # 检查博士是否直接给出家具套装名字
+    name = any_match(data.text, furniset_list_names)
 
-    wait = await data.wait(Chain(data).text(text))
-    if wait:
-        index = get_index_from_text(wait.text_digits, furniset_list)
-
-    furniset_item = {}
-
-    if index is not None:
+    if name:
+        index = furniset_list_names.index(name)
         furniset = furniset_list[index]
-        furniset_item['id'] = furniset.id
-        furniset_item['name'] = furniset.name
-        furniset_item['description'] = furniset.description
-        furniset_item['funitures'] = []
+    else:
+        text = f'博士，这是目前可以获得的所有家具套装的列表\n\n'
+        for i, furniset in enumerate(furniset_list):
+            text += f'[{i + 1}] %s\n' % furniset.name
 
-        #确认图片
-        furniset_image_path = f'resource/hsyhhssyy/furniture/furset_{furniset.id}.png'
-        if not os.path.exists(furniset_image_path):
-            # 改为从Wiki获取该文件
-            furniset_image_path = await download_wiki_image(f'主题_{furniset.name}.png',f'主题_{furniset.name}.png','resource/hsyhhssyy/furniture',f'furset_{furniset.id}.png')
-        furniset_item['image'] = furniset_image_path
+        text += '\n回复【序号】查询对应的家具套装资料'
 
-        for furni in furniset.furnitures:
-            furni_i = {}
-            furni_i['id'] = furni.id
-            furni_i['name'] = furni.name
-            furni_i['comfort'] = furni.comfort
-            furni_i['description'] = furni.description
-            furni_image_path = f'resource/hsyhhssyy/furniture/fur_{furni.id}.png'
-            if not os.path.exists(furni_image_path):
-                # 改为从Wiki获取该文件
-                furni_image_path = await download_wiki_image(f'家具_{furni.name}.png',f'家具_{furni.name}.png','resource/hsyhhssyy/furniture',f'fur_{furni.id}.png')
-            furni_i['image'] = furni_image_path
+        wait = await data.wait(Chain(data).text(text))
+        if wait:
+            index = get_index_from_text(wait.text_digits, furniset_list)
 
-            furniset_item['funitures'].append(furni_i)
+        if index is not None:
+            furniset = furniset_list[index]
+
+    if not furniset:
+        return Chain(data).text(f'抱歉博士，没有家具套装的对应信息呢。') 
     
+    furniset_item['id'] = furniset.id
+    furniset_item['name'] = furniset.name
+    furniset_item['description'] = furniset.description
+    furniset_item['funitures'] = []
 
-    return Chain(data).html(f'{curr_dir}/template/furniture_set.html', furniset_item) 
+    #确认图片
+    furniset_image_path = f'resource/hsyhhssyy/furniture/furset_{furniset.id}.png'
+    if not os.path.exists(furniset_image_path):
+        # 改为从Wiki获取该文件
+        furniset_image_path = await download_wiki_image(f'主题_{furniset.name}.png',f'主题_{furniset.name}.png','resource/hsyhhssyy/furniture',f'furset_{furniset.id}.png')
+    furniset_item['image'] = furniset_image_path
+
+    for furni in furniset.furnitures:
+        furni_i = {}
+        furni_i['id'] = furni.id
+        furni_i['name'] = furni.name
+        furni_i['comfort'] = furni.comfort
+        furni_i['description'] = furni.description
+        furni_image_path = f'resource/hsyhhssyy/furniture/fur_{furni.id}.png'
+        if not os.path.exists(furni_image_path):
+            # 改为从Wiki获取该文件
+            furni_image_path = await download_wiki_image(f'家具_{furni.name}.png',f'家具_{furni.name}.png','resource/hsyhhssyy/furniture',f'fur_{furni.id}.png')
+        furni_i['image'] = furni_image_path
+
+        furniset_item['funitures'].append(furni_i)
+
+    return Chain(data).html(path=f'{curr_dir}/template/furniture_set.html', data=furniset_item,width = 800) 

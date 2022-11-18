@@ -10,36 +10,44 @@
     <title>template</title>
 </head>
 <body>
-<div id="template">
-    <div class="stage-title">{{ data.name }}</div>
-    <div class="stage-info">
-        <div>
-            <div v-html="description(data.description)"></div>
+    <div id="template">
+        <div class="furni-set">
+            <div class="arknights-logo"></div>
+            <div class="arknights-title">明日方舟家具套装展示</div>
         </div>
-        <div class="stage-map">
-            <img :src="`../../../resource/hsyhhssyy/furniture/furset_${data.id}.png`"
-                 :alt="data.id"
-                 onerror="hideImage(this)">
-        </div>
-    </div>
-    
-    <div v-for="furni in data.funitures">
-        <div class="stage-title">
-            <div>{{ furni.name }}</div>
-            <div class="info-detail">舒适度：{{ furni.comfort }}</div>
-        </div></div>
-        <div class="stage-info"> 
-            <div>
-                <div v-html="description(furni.description)"></div>
+        
+        <div class="furni-set-sep">家具套装</div>
+
+        <div class="furni-set">
+            <div class="furni-set-text">
+                <div class="furni-set-title">家具套装：{{ data.name }}</div>
+                <div class="furni-set-info" v-html="description(data.description)"></div>
             </div>
-            <div class="stage-map">
-                <img :src="`../../../resource/hsyhhssyy/furniture/fur_${furni.id}.png`"
+            <div class="furni-set-image">
+                <img :src="`../../../${data.image}`"
                      :alt="data.id"
                      onerror="hideImage(this)">
             </div>
         </div>
+        <div class="furni-set-sep">单件展示</div>
+    
+        <div v-for="furni in data.funitures">
+            <div class="furni-box">
+                <div class="furni-text">
+                    <div>
+                        <div class="furni-title">{{ furni.name }}</div>
+                        <div class="furni-comfort">舒适度：{{ furni.comfort }}</div>
+                    </div>
+                    <div class="furni-desc">{{ furni.description }}</div>
+                </div>
+                <div class="furni-image">
+                    <img :src="`../../../${furni.image}`"
+                         :alt="furni.id"
+                         onerror="hideImage(this)">
+                </div>
+            </div></div>
+        </div>
     </div>
-</div>
 </body>
 <script src="js/vue.min.js"></script>
 <script>
