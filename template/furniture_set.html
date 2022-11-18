@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link type="text/css" rel="styleSheet" href="font.css"/>
+    <link type="text/css" rel="styleSheet" href="furniture_set.css"/>
+    <title>template</title>
+</head>
+<body>
+<div id="template">
+    <div class="stage-title">{{ data.name }}</div>
+    <div class="stage-info">
+        <div>
+            <div v-html="description(data.description)"></div>
+        </div>
+        <div class="stage-map">
+            <img :src="`../../../resource/hsyhhssyy/furniture/furset_${data.id}.png`"
+                 :alt="data.id"
+                 onerror="hideImage(this)">
+        </div>
+    </div>
+    
+    <div v-for="furni in data.funitures">
+        <div class="stage-title">
+            <div>{{ furni.name }}</div>
+            <div class="info-detail">舒适度：{{ furni.comfort }}</div>
+        </div></div>
+        <div class="stage-info"> 
+            <div>
+                <div v-html="description(furni.description)"></div>
+            </div>
+            <div class="stage-map">
+                <img :src="`../../../resource/hsyhhssyy/furniture/fur_${furni.id}.png`"
+                     :alt="data.id"
+                     onerror="hideImage(this)">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="js/vue.min.js"></script>
+<script>
+    function hideImage(e) {
+        e.style.display = 'none'
+    }
+
+    const template = new Vue({
+        el: '#template',
+        computed: {
+        },
+        methods: {
+            init(data) {
+                this.$set(this, 'data', data)
+            },
+            description(text) {
+                return text.replace(/<@lv.fs>/g, '').replace(/<@lv.item>/g, '').split('\\n').join('<br>')
+            },
+        },
+        data() {
+            return {
+                data: {},
+            }
+        },
+        mounted() {
+            window.init = this.init
+        }
+    })
+</script>
+</html>
